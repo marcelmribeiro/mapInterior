@@ -1,0 +1,18 @@
+html,body {
+	background-color: black;
+	height: 96%;
+}
+
+#map {
+	height: 100%;
+	margin: 25px;
+}
+
+#leaflet-control-attribution leaflet-control {
+  background: #6b6b6b;
+  margin: 0;
+}
+
+ 
+
+ 

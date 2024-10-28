@@ -33,6 +33,12 @@ var light2 = L.tileLayer(CartoDB_VoyagerLabelsUnder, {
 });
 */
 
+const queryString = window.location.search;
+//console.log(queryString);
+const urlParams = new URLSearchParams(queryString);
+const unParam = urlParams.get('un')
+console.log(unParam);
+
 var map = L.map('map', {
   center: [-5.1, -39.3],
   zoom: 8,
@@ -106,8 +112,8 @@ function onEachFeature(f, fl) {
     lgp.addLayer(lgp);
     lg.addLayer(fl);
     
-    /*if (fl.feature.geometry.type === 'Polygon'){
-      console.log(f);
+    /*if (fl.feature.geometry.type === 'Point'){
+      console.log(fl);     // Mostra a Feature Criada
     }*/
 }
 
@@ -275,34 +281,13 @@ var overlays = {
 
 L.control.layers(baseLayers, overlays, {sortLayers:true,hideSingleBase:true,collapsed:false}).addTo(map);
 
-var searchControlUn = new L.Control.Search({
-  layer: uns,
-  initial: false,
-  propertyName: "une_sgl_un",
-  textPlaceholder: "UN: ",
-  marker: false,
-  moveToLocation: function (latlng, title, map) {
-    switch (latlng.layer.feature.geometry.type) {
-      case "Point":
-        console.log(latlng.layer.getLatLng());
-        map.flyTo(latlng.layer.getLatLng(), 14);
-        break;
-      case "Polygon":
-        console.log(latlng.layer.getBounds());
-        //map.fitBounds(latlng.layer.getBounds());
-        var zoom = map.getBoundsZoom(latlng.layer.getBounds());
-        map.setView(latlng, zoom); // access the zoom
-        break;
-    }
-  },
-});
-
-
 var searchControlUtr = new L.Control.Search({
   layer: utri,
   initial: false,
   propertyName: "UTR",
   textPlaceholder: "UTR: ",
+  textErr: 'Local não encontrado',
+  autoColapse: true,
   marker: false,
   moveToLocation: function (latlng, title, map) {
     switch (latlng.layer.feature.geometry.type) {
@@ -319,8 +304,36 @@ var searchControlUtr = new L.Control.Search({
     }
   },
 });
+
+var searchControlUn = new L.Control.Search({
+  layer: uns,
+  initial: false,
+  propertyName: "une_sgl_un",
+  textPlaceholder: "UN: ",
+  textErr: 'Local não encontrado',
+  autoColapse: true,
+  marker: false,
+  moveToLocation: function (latlng, title, map) {
+    switch (latlng.layer.feature.geometry.type) {
+      case "Point":
+        console.log(latlng.layer.getLatLng());
+        map.flyTo(latlng.layer.getLatLng(), 14);
+        break;
+      case "Polygon":
+        console.log(latlng.layer.getBounds());
+        //map.fitBounds(latlng.layer.getBounds());
+        var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+        map.setView(latlng, zoom); // access the zoom
+        break;
+    }
+  },
+});
+
+
 map.addControl(searchControlUtr);
 map.addControl(searchControlUn);
+
+
 
 //---- Timer refresh da camada UTR -----
 function Timer(fn, t) {
@@ -353,6 +366,7 @@ var timer = new Timer(function() {
     console.log('atualizando - '+ d.toLocaleString());
     console.log('Map has Layer utri = '+ map.hasLayer(utri));
     utri.refresh();
+    searchControlUn.searchText(unParam);
 }, 30000);
 
 //------- Eventos -----------
